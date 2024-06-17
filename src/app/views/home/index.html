@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pozice a ostatní</title>
+</head>
+<body>
+    <button onclick="getLocation()">Try It</button>
+    <p id="lokace"></p>
+    <p id="weather"></p>
+    <p id="timezone"></p>
+
+    <script>
+        const lokaceElement = document.getElementById("lokace");
+        const weatherElement = document.getElementById("weather");
+        const timezoneElement = document.getElementById("timezone");
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                lokaceElement.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            
+            lokaceElement.innerHTML = `Latitude: ${latitude}<br>Longitude: ${longitude}`;
+
+            getWeatherAndTimeZone(latitude, longitude);
+        }
+
+        function getWeatherAndTimeZone(latitude, longitude) {
+            const APIKey = 'f862effebdecf1bef22f57a1b8a74d63';
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${APIKey}`;
+
+            fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                const weatherDescription = data.weather[0].description;
+                const temperature = (data.main.temp - 273.15).toFixed(2);
+
+                weatherElement.innerHTML = `Weather: ${weatherDescription}<br>Temperature: ${temperature}°C`;
+
+                const timezoneOffset = data.timezone;
+                const localTimeUnix = data.dt;
+                const localTime = new Date(localTimeUnix * 1000).toLocaleString();
+
+                timezoneElement.innerHTML = `Time Zone: ${timezoneOffset}<br>Local Time: ${localTime}`;
+            })
+            .catch(error => console.log(error));
+        }
+    </script>
+</body>
+</html>
